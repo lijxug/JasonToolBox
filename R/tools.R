@@ -52,7 +52,7 @@ msgASAP <- function(ttl, msg = "", SCKEY){
 #'
 #' @export
 #'
-#' @example to be done.
+# #' @example to be done.
 processBar = function(objName,
                       i,
                       cycles,
