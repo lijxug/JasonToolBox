@@ -206,3 +206,49 @@ gg_color_hue <- function(n) {
   hues = seq(15, 375, length = n + 1)
   grDevices::hcl(h = hues, l = 65, c = 100)[1:n]
 }
+
+#' Differential expression analysis using Wilcoxon test
+#'
+#'@param x A list with two named expression matrixces of n genes * m cells.
+#'@param ... Other options. Placeholder, not used yet.
+#'
+#'@export
+dea.wilcox = function(x, ...){
+# x being the list with two named expression matrixes,
+# ... whose rownames correspond to tx_names and colnames to sample_names
+# other augments:
+mt1 = x[[1]]
+mt2 = x[[2]]
+
+args = list(...)
+progress = ifelse(is.null(args$progress), T, args$progress)
+
+stopifnot(nrow(mt1) == nrow(mt2))
+
+n_tx = nrow(mt1)
+p_vals = rep(NA, n_tx)
+means_mt1 = rep(NA, n_tx)
+means_mt2 = rep(NA, n_tx)
+iter01 = ".I1_fun"
+initiatePB(iter01)
+for(i in 1:n_tx){
+  t_res = wilcox.test(mt1[i, ], mt2[i, ])
+  p_vals[i] = t_res$p.value
+  means_mt1[i] = mean(mt1[i,])
+  means_mt2[i] = mean(mt2[i,])
+  if(progress) processBar(iter01, i, n_tx, tail = "ETA")
+}
+FC = means_mt2 / (means_mt1 + .0001)
+LFC = log2(FC)
+p_adjs = p.adjust(p_vals)
+
+res_tbl = tibble(id = rownames(mt1),
+                 means_mt1 = means_mt1,
+                 means_mt2 = means_mt2,
+                 FoldChange = FC,
+                 LogFC = LFC,
+                 P.Value = p_vals,
+                 adj.P.Val = p_adjs)
+
+return(res_tbl)
+}
