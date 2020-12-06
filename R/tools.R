@@ -51,6 +51,8 @@ msgASAP <- function(ttl, msg = "", SCKEY){
 #' @param final   String; Default = "Work done!"
 #'
 #' @export
+#'
+#' @example to be done.
 processBar = function(objName,
                       i,
                       cycles,
