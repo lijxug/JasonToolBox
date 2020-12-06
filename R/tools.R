@@ -23,7 +23,7 @@ msgASAP <- function(ttl, msg = "", SCKEY){
   website="https://sc.ftqq.com/"
   url = paste0(website, SCKEY, ".send?")
 
-  assert_that(is.character(ttl))
+  stopifnot(is.character(ttl))
   ttl = gsub("\\s", "%20", ttl)
 
   url = paste0(url, "text=", ttl)
@@ -40,8 +40,17 @@ msgASAP <- function(ttl, msg = "", SCKEY){
 #' a terminal process Bar, use initiatePB to initialize at the beginning of the forloop,
 #' and insert processBar with objName, i, cycles inside the for loop
 #'
+#' @param objName String; name of the processBar object, which is actually an iterator object
+#' @param i       Integer;
+#' @param cycles  Integer;
+#' @param title   String; Default = "Process"
+#' @param scale   Integer; Default = 40
+#' @param sign    Character; Default = "#"
+#' @param tail    String; Default = ""
+#' @param terminal String; Default = "R"
+#' @param final   String; Default = "Work done!"
+#'
 #' @export
-#' @import iterators
 processBar = function(objName,
                       i,
                       cycles,
@@ -51,7 +60,7 @@ processBar = function(objName,
                       tail = "",
                       terminal = "R", # terminal could be R/log, others default to shell
                       final = "Work done!") {
-  suppressPackageStartupMessages(require("iterators"))
+  stopifnot(requireNamespace("iterators", quietly = TRUE))
   if (!exists(objName)) {
     if (terminal != "R")
       words_list = unlist(lapply(1:cycles, function(x) {
@@ -71,17 +80,17 @@ processBar = function(objName,
           paste0(rep(sign, ceiling(x * scale / cycles)), collapse = "")
         )
       }))
-    eval(parse(text = sprintf("%s <<- iter(words_list)", objName)))
+    eval(parse(text = sprintf("%s <<- iterators::iter(words_list)", objName)))
     eval(parse(text = sprintf("%s <<- Sys.time()", paste0(".TIC_",objName))))
     # if i didn't start at 1
     times = i
     while (times > 1) {
-      msg = eval(parse(text = sprintf("nextElem(%s)", objName)))
+      msg = eval(parse(text = sprintf("iterators::nextElem(%s)", objName)))
       times = times - 1
     }
   }
 
-  msg = eval(parse(text = sprintf("nextElem(%s)", objName)))
+  msg = eval(parse(text = sprintf("iterators::nextElem(%s)", objName)))
   if(tail == "ETA"){
     .tic = eval(parse(text = sprintf("%s", paste0(".TIC_",objName))))
     if(terminal != "R"){
@@ -102,6 +111,12 @@ processBar = function(objName,
   }
 }
 
+
+#' Initiate and reset Process Bar
+#'
+#' @param iterOBJ String; Name of the iterator
+#'
+#' @export
 initiatePB = function(iterOBJ){
   .tic = sprintf("%s", paste0(".TIC_", iterOBJ))
   rm_list = c(iterOBJ, .tic)
@@ -111,9 +126,12 @@ initiatePB = function(iterOBJ){
 
 #' Extract legend from a ggplot object
 #'
+#' @param a.gplot A ggplot object
+#'
 #' @export
 #'
 extractLegend<-function(a.gplot){
+  stopifnot(requireNamespace("ggplot2", quietly = TRUE))
   # a function to extract legends from ggplot object
   # http://stackoverflow.com/questions/12041042/how-to-plot-just-the-legends-in-ggplot2
   tmp <- ggplot2::ggplot_gtable(ggplot2::ggplot_build(a.gplot))
@@ -133,6 +151,7 @@ extractLegend<-function(a.gplot){
 #'
 EXWB.initiate = function(...) {
   # suppressPackageStartupMessages(require(openxlsx))
+  stopifnot(requireNamespace("openxlsx", quietly = TRUE))
   args = list(...)
 
   wb <- openxlsx::createWorkbook()
@@ -147,16 +166,17 @@ EXWB.initiate = function(...) {
 #' Inititate a openxlsx workbook with hard-coded format. Will be upgraded in the future (if necessary)
 #'
 #' @param wb An openxlsx wb object to be written in
-#' @param sheetName String, Name of the sheet to write.
+#' @param sheetName String; Name of the sheet to write.
 #' Sheet name must have <= 31 characters without any strange characters like !\@\#\$\%\^\&\*\(\)
 #' @param sheetData Data frame or tibble to write.
-#' @param overwrite Logical, if to overwrite the sheet with the same name.
+#' @param overwrite Logical; if to overwrite the sheet with the same name.
 #'
 #' @export
 #'
 EXWB.writeSheet = function(wb, sheetName, sheetData, overwrite = F, ...){
   # suppressPackageStartupMessages(require(openxlsx))
   # suppressPackageStartupMessages(require(dplyr))
+  stopifnot(requireNamespace("openxlsx", quietly = TRUE))
   args = list(...)
 
   stopifnot(nchar(sheetName) <= 31)
@@ -178,7 +198,7 @@ EXWB.writeSheet = function(wb, sheetName, sheetData, overwrite = F, ...){
 #' Generate ggplot default colors
 #'
 #' adopted from \url{https://stackoverflow.com/questions/8197559/emulate-ggplot2-default-color-palette}
-#' @param n integer, number of the generated colors
+#' @param n Integer; number of the generated colors
 #' @export
 gg_color_hue <- function(n) {
   hues = seq(15, 375, length = n + 1)
