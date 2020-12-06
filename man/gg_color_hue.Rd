@@ -7,7 +7,7 @@
 gg_color_hue(n)
 }
 \arguments{
-\item{n}{integer, number of the generated colors}
+\item{n}{Integer; number of the generated colors}
 }
 \description{
 adopted from \url{https://stackoverflow.com/questions/8197559/emulate-ggplot2-default-color-palette}

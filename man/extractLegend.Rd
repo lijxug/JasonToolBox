@@ -6,6 +6,9 @@
 \usage{
 extractLegend(a.gplot)
 }
+\arguments{
+\item{a.gplot}{A ggplot object}
+}
 \description{
 Extract legend from a ggplot object
 }
