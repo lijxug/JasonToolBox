@@ -16,6 +16,25 @@ processBar(
   final = "Work done!"
 )
 }
+\arguments{
+\item{objName}{String; name of the processBar object, which is actually an iterator object}
+
+\item{i}{Integer;}
+
+\item{cycles}{Integer;}
+
+\item{title}{String; Default = "Process"}
+
+\item{scale}{Integer; Default = 40}
+
+\item{sign}{Character; Default = "#"}
+
+\item{tail}{String; Default = ""}
+
+\item{terminal}{String; Default = "R"}
+
+\item{final}{String; Default = "Work done!"}
+}
 \description{
 a terminal process Bar, use initiatePB to initialize at the beginning of the forloop,
 and insert processBar with objName, i, cycles inside the for loop
