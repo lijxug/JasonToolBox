@@ -63,7 +63,7 @@ processBar = function(objName,
                       terminal = "R", # terminal could be R/log, others default to shell
                       final = "Work done!") {
   stopifnot(requireNamespace("iterators", quietly = TRUE))
-  if (!exists(objName)) {
+  if (!exists(objName)) { # if first run/initialized
     if (terminal != "R")
       words_list = unlist(lapply(1:cycles, function(x) {
         sprintf(
@@ -109,7 +109,7 @@ processBar = function(objName,
     if(nchar(final)) final = loginfo(final, printnow = F)
     if(terminal != "R") cat("\033[?25h")
     cat(paste0("\n", final))
-    rm(list = objName, inherits = T)
+    rm(list = objName, envir = parent.frame(2)) # clean the global variable in the parent environment
   }
 }
 
@@ -117,13 +117,22 @@ processBar = function(objName,
 #' Initiate and reset Process Bar
 #'
 #' @param iterOBJ String; Name of the iterator
-#'
 #' @export
 initiatePB = function(iterOBJ){
   .tic = sprintf("%s", paste0(".TIC_", iterOBJ))
   rm_list = c(iterOBJ, .tic)
   if(any(exists(rm_list, inherits = T)))
-    rm(list = rm_list, inherits = T)
+    rm(list = rm_list, envir = parent.frame(2))
+}
+
+
+test_processBar = function(){
+  iter01 = ".I1"
+  initiatePB(iter01)
+  for(i in 1:100){
+    Sys.sleep(0.1)
+    processBar(objName = iter01, i = i, cycles = 100, tail = "ETA")
+  }
 }
 
 #' Extract legend from a ggplot object
@@ -213,42 +222,45 @@ gg_color_hue <- function(n) {
 #'@param ... Other options. Placeholder, not used yet.
 #'
 #'@export
-dea.wilcox = function(x, ...){
-# x being the list with two named expression matrixes,
-# ... whose rownames correspond to tx_names and colnames to sample_names
-# other augments:
-mt1 = x[[1]]
-mt2 = x[[2]]
+dea.wilcox = function(x, ...) {
+  # x being the list with two named expression matrixes,
+  # ... whose rownames correspond to tx_names and colnames to sample_names
+  # other augments:
+  mt1 = x[[1]]
+  mt2 = x[[2]]
 
-args = list(...)
-progress = ifelse(is.null(args$progress), T, args$progress)
+  args = list(...)
+  progress = ifelse(is.null(args$progress), T, args$progress)
 
-stopifnot(nrow(mt1) == nrow(mt2))
+  stopifnot(nrow(mt1) == nrow(mt2))
 
-n_tx = nrow(mt1)
-p_vals = rep(NA, n_tx)
-means_mt1 = rep(NA, n_tx)
-means_mt2 = rep(NA, n_tx)
-iter01 = ".I1_fun"
-initiatePB(iter01)
-for(i in 1:n_tx){
-  t_res = wilcox.test(mt1[i, ], mt2[i, ])
-  p_vals[i] = t_res$p.value
-  means_mt1[i] = mean(mt1[i,])
-  means_mt2[i] = mean(mt2[i,])
-  if(progress) processBar(iter01, i, n_tx, tail = "ETA")
-}
-FC = means_mt2 / (means_mt1 + .0001)
-LFC = log2(FC)
-p_adjs = p.adjust(p_vals)
+  n_tx = nrow(mt1)
+  p_vals = rep(NA, n_tx)
+  means_mt1 = rep(NA, n_tx)
+  means_mt2 = rep(NA, n_tx)
+  iter01 = ".I1_fun"
+  initiatePB(iter01)
+  for (i in 1:n_tx) {
+    t_res = wilcox.test(mt1[i,], mt2[i,])
+    p_vals[i] = t_res$p.value
+    means_mt1[i] = mean(mt1[i, ])
+    means_mt2[i] = mean(mt2[i, ])
+    if (progress)
+      processBar(iter01, i, n_tx, tail = "ETA")
+  }
+  FC = means_mt2 / (means_mt1 + .0001)
+  LFC = log2(FC)
+  p_adjs = p.adjust(p_vals)
 
-res_tbl = tibble(id = rownames(mt1),
-                 means_mt1 = means_mt1,
-                 means_mt2 = means_mt2,
-                 FoldChange = FC,
-                 LogFC = LFC,
-                 P.Value = p_vals,
-                 adj.P.Val = p_adjs)
+  res_tbl = tibble(
+    id = rownames(mt1),
+    means_mt1 = means_mt1,
+    means_mt2 = means_mt2,
+    FoldChange = FC,
+    LogFC = LFC,
+    P.Value = p_vals,
+    adj.P.Val = p_adjs
+  )
 
-return(res_tbl)
+  return(res_tbl)
 }
