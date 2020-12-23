@@ -2,7 +2,7 @@
 
 export(EXWB.initiate)
 export(EXWB.writeSheet)
-export(apply.MM)
+export(apply_MM)
 export(dea.wilcox)
 export(extractLegend)
 export(gg_color_hue)

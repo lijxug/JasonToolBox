@@ -277,7 +277,7 @@ dea.wilcox = function(x, ...) {
 #'
 #' @export
 #'
-apply.MM <- function(X, MARGIN = 1, FUN) {
+apply_MM <- function(X, MARGIN = 1, FUN) {
   stopifnot(requireNamespace("Matrix", quietly = TRUE))
   X2 <- as(X, "dgTMatrix")
   if(MARGIN == 1){
