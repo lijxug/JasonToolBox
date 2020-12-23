@@ -264,3 +264,29 @@ dea.wilcox = function(x, ...) {
 
   return(res_tbl)
 }
+
+#' Apply for Sparse matrix
+#'
+#' Use it with cautions! Only apply FUN to all the non-zero values!!
+#'
+#' @param X, a sparse matrix
+#' @param MARGIN 1 or 2, indicating row-wise or column-wise
+#' @param FUN a function
+#'
+#' @return
+#' @export
+apply.MM <- function(X, MARGIN = 1, FUN) {
+  stopifnot(requireNamespace("Matrix", quietly = TRUE))
+  X2 <- as(X, "dgTMatrix")
+  if(MARGIN == 1){
+    res <- numeric(nrow(X))
+    tmp <- tapply(X2@x, X2@i, FUN)
+
+  } else if(MARGIN == 2){
+    res <- numeric(ncol(X))
+    tmp <- tapply(X2@x, X2@j, FUN)
+
+  }
+  res[as.integer(names(tmp)) + 1] <- tmp
+  res
+}
