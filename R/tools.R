@@ -273,8 +273,10 @@ dea.wilcox = function(x, ...) {
 #' @param MARGIN 1 or 2, indicating row-wise or column-wise
 #' @param FUN a function
 #'
-#' @return
+#' @return Numeric vector
+#'
 #' @export
+#'
 apply.MM <- function(X, MARGIN = 1, FUN) {
   stopifnot(requireNamespace("Matrix", quietly = TRUE))
   X2 <- as(X, "dgTMatrix")

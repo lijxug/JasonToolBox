@@ -14,7 +14,7 @@ apply.MM(X, MARGIN = 1, FUN)
 \item{FUN}{a function}
 }
 \value{
-
+Numeric vector
 }
 \description{
 Use it with cautions! Only apply FUN to all the non-zero values!!
