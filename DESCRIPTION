@@ -10,7 +10,8 @@ Authors@R:
 Description: 
     An easily install pearsonal toolbox.
 License: MIT
+Imports: iterators
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
-Suggests: openxlsx, iterators, ggplot2, Matrix
+Suggests: openxlsx, ggplot2, Matrix
