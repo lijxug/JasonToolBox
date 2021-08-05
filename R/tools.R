@@ -20,7 +20,7 @@ loginfo <- function(..., printnow = T) {
 #' @export
 msgASAP <- function(ttl, msg = "", SCKEY){
   # warning: authorized access only
-  website="https://sc.ftqq.com/"
+  website="https://sctapi.ftqq.com/"
   url = paste0(website, SCKEY, ".send?")
 
   stopifnot(is.character(ttl))
