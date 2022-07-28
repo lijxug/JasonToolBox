@@ -1,3 +1,20 @@
+#' Get the lower triangle of a symmetric matrix
+#'
+#' @param x_mt A symmetric matrix
+#' @param keep_diag Logical. Keep diagonal values or not.
+#' @return A data frame
+#' @export
+getLowerTri2df = function(x_mt, keep_diag = T){
+  stopifnot(all(rownames(x_mt) == colnames(x_mt)))
+  clusters = rownames(x_mt)
+  row_tags = clusters[row(x_mt)]
+  col_tags = clusters[col(x_mt)]
+  low_idx = lower.tri(x_mt, diag = keep_diag)
+  out_df = data.frame(row_tag = row_tags[low_idx], col_tag = col_tags[low_idx], 
+                      value = x_mt[low_idx])
+  return(out_df)
+}
+
 #' Print formated log
 #'
 #' @param ... a string or list of strings to print

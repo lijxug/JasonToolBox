@@ -9,7 +9,7 @@ Authors@R:
            comment = c(ORCID = "0000-0002-8720-1344"))
 Description: 
     An easily install pearsonal toolbox.
-License: MIT
+License: GPL-3 + file LICENSE
 Imports: iterators
 Encoding: UTF-8
 LazyData: true
