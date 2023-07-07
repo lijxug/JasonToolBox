@@ -15,6 +15,8 @@ Sheet name must have <= 31 characters without any strange characters like !\@\#\
 \item{sheetData}{Data frame or tibble to write.}
 
 \item{overwrite}{Logical; if to overwrite the sheet with the same name.}
+
+\item{...}{Other arguments for openxlsx::writeDataTable}
 }
 \description{
 Inititate a openxlsx workbook with hard-coded format. Will be upgraded in the future (if necessary)

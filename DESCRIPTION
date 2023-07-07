@@ -1,6 +1,6 @@
 Package: JasonToolBox
 Title: Jason's toolbox for R
-Version: 2020.12.06.01
+Version: 2023.06.27.01
 Authors@R: 
     person(given = "Jason",
            family = "Li",
@@ -10,8 +10,8 @@ Authors@R:
 Description: 
     An easily install pearsonal toolbox.
 License: GPL-3 + file LICENSE
-Imports: iterators
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.3
+Imports: stats, utils, methods, iterators, pbmcapply, tidyr, dplyr, magrittr
 Suggests: openxlsx, ggplot2, Matrix

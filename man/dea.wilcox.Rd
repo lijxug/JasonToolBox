@@ -11,6 +11,9 @@ dea.wilcox(x, ...)
 
 \item{...}{Other options. Placeholder, not used yet.}
 }
+\value{
+a data.frame
+}
 \description{
 Differential expression analysis using Wilcoxon test
 }
