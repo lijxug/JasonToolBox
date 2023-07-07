@@ -143,7 +143,7 @@ processBar = function(objName,
 initiatePB = function(iterOBJ){
   .tic = sprintf("%s", paste0(".TIC_", iterOBJ))
   rm_list = c(iterOBJ, .tic)
-  if(any(exists(rm_list, inherits = T)))
+  if(any(unlist(lapply(rm_list, function(x){exists(x, inherits = T)}))))
     rm(list = rm_list, envir = parent.frame(2))
 }
 
