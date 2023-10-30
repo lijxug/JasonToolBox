@@ -568,8 +568,9 @@ batch_testing = function(data_df,
 #' @import DirichletReg reshape2 dplyr
 #'
 #' @export
+#' 
 dirichletTest = function(count_df, predictor){
-  require(DirichletReg)
+  # require(DirichletReg)
   count_df$Y = DirichletReg::DR_data(count_df)
   count_df$predictor =  predictor[rownames(count_df$Y)]
   fit = DirichletReg::DirichReg(Y ~ predictor, count_df)

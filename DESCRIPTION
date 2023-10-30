@@ -15,5 +15,5 @@ LazyData: true
 RoxygenNote: 7.2.3
 Imports: 
   stats, utils, methods, iterators, pbmcapply, tidyr, dplyr, magrittr, 
-  DirichletReg
+  DirichletReg, reshape2
 Suggests: openxlsx, ggplot2, Matrix
