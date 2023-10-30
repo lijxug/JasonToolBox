@@ -603,7 +603,9 @@ dirichletTest = function(count_df, predictor){
 #' @param counts_bystatus A x B count matrix
 #' @param ... other arguments for `fisher.test`
 #' 
+#' @export
 #' @return a data.frame for p values and ORs from `fisher.test`
+#' 
 fisherTest = function(counts_bystatus, ...){
   fisher_lst = list()
   for(i in 1:nrow(counts_bystatus)){
