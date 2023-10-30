@@ -421,8 +421,8 @@ batch_testing = function(data_df,
               id_cols = dplyr::all_of(pairby),
               names_from = group_var,
               values_from = test_var
-            ) %>% dplyr::filter(!is.na(!!(dplyr::sym(x_cat))) &
-                                  !is.na(!!(dplyr::sym(y_cat))))
+            ) %>% dplyr::filter(!is.na(!!(dplyr::sym(as.character(x_cat)))) &
+                                  !is.na(!!(dplyr::sym(as.character(y_cat)))))
           x1 = p_test_tbl[[x_cat]]
           x2 = p_test_tbl[[y_cat]]
         }
@@ -522,4 +522,103 @@ batch_testing = function(data_df,
   }
   
   return(res_tbl)
+}
+
+
+# #' Dirichlet-multinomial regression test
+# #' this function is adapted from https://github.com/cssmillie/ulcerative_colitis:analysis.r  
+# #'
+# #' @export
+# #'
+# dirichlet_regression = function(counts, covariates, formula){  
+#   # Dirichlet multinomial regression to detect changes in cell frequencies
+#   # formula is not quoted, example: counts ~ condition
+#   # counts is a [samples x cell types] matrix
+#   # covariates holds additional data to use in the regression
+#   #
+#   # Example:
+#   # counts = do.call(cbind, tapply(seur@data.info$orig.ident, seur@ident, table))
+#   # covariates = data.frame(condition=gsub('[12].*', '', rownames(counts)))
+#   # res = dirichlet_regression(counts, covariates, counts ~ condition)
+#   
+#   #ep.pvals = dirichlet_regression(counts=ep.freq, covariates=ep.cov, formula=counts ~ condition)$pvals
+#   
+#   # Calculate regression
+#   counts = as.data.frame(counts)
+#   counts$counts = DR_data(counts)
+#   data = cbind(counts, covariates)
+#   fit = DirichReg(counts ~ condition, data)
+#   
+#   # Get p-values
+#   u = summary(fit)
+#   #compared with healthy condition, 15 vars. noninflame and inflame, 30pvalues
+#   pvals = u$coef.mat[grep('Intercept', rownames(u$coef.mat), invert=T), 4] 
+#   v = names(pvals)
+#   pvals = matrix(pvals, ncol=length(u$varnames))
+#   rownames(pvals) = gsub('condition', '', v[1:nrow(pvals)])
+#   colnames(pvals) = u$varnames
+#   fit$pvals = pvals
+#   
+#   fit
+# }
+#' Dirichlet-multinomial regression test
+#' @param count_df sample x cell_fraction data.frame
+#' @param predictor A named vector
+#' 
+#' @import DirichletReg reshape2 dplyr
+#'
+#' @export
+dirichletTest = function(count_df, predictor){
+  require(DirichletReg)
+  count_df$Y = DirichletReg::DR_data(count_df)
+  count_df$predictor =  predictor[rownames(count_df$Y)]
+  fit = DirichletReg::DirichReg(Y ~ predictor, count_df)
+  u = summary(fit)
+  #compared with healthy condition, 15 vars. noninflame and inflame, 30pvalues
+  pvals = u$coef.mat[, 4]
+  v = names(pvals)
+  pvals = matrix(pvals, ncol = length(u$varnames))
+  estimates = matrix(u$coef.mat[, 1], ncol = length(u$varnames))
+  tmp_rownames = gsub('predictor', '', v[1:nrow(pvals)])
+  tmp_rownames[tmp_rownames == '(Intercept)'] = setdiff(unique(count_df$predictor), tmp_rownames)
+  rownames(pvals) = tmp_rownames
+  rownames(estimates) = tmp_rownames
+  colnames(pvals) = u$varnames
+  colnames(estimates) = u$varnames
+  fit$pvals = pvals
+  fit$estimates = estimates
+  
+  pvals_df = reshape2::melt(pvals, varnames = c('status', 'celltypes'), value.name = 'p.value')
+  estimates_df = reshape2::melt(estimates, varnames = c('status', 'celltypes'), value.name = 'estimates')
+  
+  res_df = left_join(pvals_df, estimates_df, by = c('status', 'celltypes'))
+  res_df$isInterval = res_df$status == levels(predictor)[1]
+  fit$res_df = res_df
+  
+  return(fit)
+}
+
+#' Batch fisher test
+#' @param counts_bystatus A x B count matrix
+#' @param ... other arguments for `fisher.test`
+#' 
+#' @return a data.frame for p values and ORs from `fisher.test`
+fisherTest = function(counts_bystatus, ...){
+  fisher_lst = list()
+  for(i in 1:nrow(counts_bystatus)){
+    tmp_lst = lapply(1:ncol(counts_bystatus), function(j){
+      tmp_mt = matrix(c(counts_bystatus[i, j], sum(counts_bystatus[-i, j]), 
+        sum(counts_bystatus[i, -j]), sum(counts_bystatus[-i, -j])), nrow = 2
+      )
+      rownames(tmp_mt) = c(rownames(counts_bystatus)[i], 'others')
+      colnames(tmp_mt) = c(colnames(counts_bystatus)[j], 'others')
+      fish_obj = fisher.test(tmp_mt, ...)
+      return(data.frame(i = rownames(counts_bystatus)[i], j = colnames(counts_bystatus)[j], fisher.p.val = fish_obj$p.value, fisher.OR = fish_obj$estimate))
+    })
+    fisher_lst[[i]] = do.call(rbind, tmp_lst)
+  }
+  fisher_df = do.call(rbind, fisher_lst)
+  fisher_df$fisher.p.adj = p.adjust(fisher_df$fisher.p.val, 'BH')
+  rownames(fisher_df) = NULL
+  return(fisher_df)
 }
