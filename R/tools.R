@@ -322,11 +322,13 @@ apply_MM <- function(X, MARGIN = 1, FUN) {
 #' @param x,y numeric vector of data values. Non-finite values will be ommitted
 #' @param n_perm permutation times
 #' @param alternative a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.
+#' @param seed Set permutation seed. Default = 1
 #' @param verbose logical value specify whether to print logs. Default = TRUE
 #' 
 #' @return A named list
 #' @export
-permu.test = function(x, y, n_perm = 2000, alternative = 'two.sided', verbose = T){
+permu.test = function(x, y, n_perm = 2000, alternative = 'two.sided', seed = 1, verbose = T){
+  set.seed(seed)
   x = x[is.finite(x)]
   y = y[is.finite(y)]
   observed = median(x) - median(y)
@@ -344,6 +346,7 @@ permu.test = function(x, y, n_perm = 2000, alternative = 'two.sided', verbose = 
   
   emp_p_g = (sum(perm_dist >= observed)+1)/(n_perm + 1)
   emp_p_l = (sum(perm_dist <= observed)+1)/(n_perm + 1)
+  emp_p_both = (sum(abs(perm_dist) <= abs(observed))+1)/(n_perm + 1)
   emp_p_b = min(emp_p_g, emp_p_l)*2
   if(alternative == 'greater'){
     return(list(observe = observed, dist = perm_dist, p.value = emp_p_g, n_perm = n_perm, alternative = alternative))
@@ -352,7 +355,7 @@ permu.test = function(x, y, n_perm = 2000, alternative = 'two.sided', verbose = 
   } else if(alternative == 'one.sided'){
     return(list(observe = observed, dist = perm_dist, p.value = min(emp_p_g,emp_p_l), n_perm = n_perm, alternative = alternative))
   } else {
-    return(list(observe = observed, dist = perm_dist, p.value = emp_p_b, n_perm = n_perm, alternative = alternative))
+    return(list(observe = observed, dist = perm_dist, p.value = emp_p_both, n_perm = n_perm, alternative = alternative))
   }
 }
 
