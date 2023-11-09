@@ -604,12 +604,13 @@ dirichletTest = function(count_df, predictor){
 
 #' Batch fisher test
 #' @param counts_bystatus A x B count matrix
+#' @param p.adjust.method P adjust method for `p.adjust`, default = 'BH'
 #' @param ... other arguments for `fisher.test`
 #' 
 #' @export
 #' @return a data.frame for p values and ORs from `fisher.test`
 #' 
-fisherTest = function(counts_bystatus, ...){
+fisherTest = function(counts_bystatus, p.adjust.method = 'BH', ...){
   fisher_lst = list()
   for(i in 1:nrow(counts_bystatus)){
     tmp_lst = lapply(1:ncol(counts_bystatus), function(j){
@@ -624,7 +625,7 @@ fisherTest = function(counts_bystatus, ...){
     fisher_lst[[i]] = do.call(rbind, tmp_lst)
   }
   fisher_df = do.call(rbind, fisher_lst)
-  fisher_df$fisher.p.adj = p.adjust(fisher_df$fisher.p.val, 'BH')
+  fisher_df$fisher.p.adj = p.adjust(fisher_df$fisher.p.val, method = p.adjust.method)
   rownames(fisher_df) = NULL
   return(fisher_df)
 }
