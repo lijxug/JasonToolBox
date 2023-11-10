@@ -620,11 +620,25 @@ fisherTest = function(counts_bystatus, p.adjust.method = 'BH', ...){
       rownames(tmp_mt) = c(rownames(counts_bystatus)[i], 'others')
       colnames(tmp_mt) = c(colnames(counts_bystatus)[j], 'others')
       fish_obj = fisher.test(tmp_mt, ...)
-      return(data.frame(i = rownames(counts_bystatus)[i], j = colnames(counts_bystatus)[j], fisher.p.val = fish_obj$p.value, fisher.OR = fish_obj$estimate))
+      return(data.frame(i = rownames(counts_bystatus)[i], j = colnames(counts_bystatus)[j], 
+                        fisher.p.val = fish_obj$p.value, fisher.OR = fish_obj$estimate))
     })
     fisher_lst[[i]] = do.call(rbind, tmp_lst)
   }
   fisher_df = do.call(rbind, fisher_lst)
+  fisher_df$fisher.p.val[fisher_df$i == fisher_df$j] = NA
+  fisher_df$fisher.OR[fisher_df$i == fisher_df$j] = NA
+  pval_mt = reshape2::acast(data = fisher_df, i~j, value.var = 'fisher.p.val')
+  padj_mt = pval_mt
+    
+  padj_mt[upper.tri(padj_mt)] = p.adjust(pval_mt[upper.tri(pval_mt)])
+  padj_mt[lower.tri(padj_mt)] = t(padj_mt)[lower.tri(padj_mt)]
+  
+  fisher_df = dplyr::left_join(
+    fisher_df,  
+    reshape2::melt(padj_mt, varnames = c('i','j'), value.name = 'fisher.p.adj'), 
+    by = c('i', 'j'))
+    
   fisher_df$fisher.p.adj = p.adjust(fisher_df$fisher.p.val, method = p.adjust.method)
   rownames(fisher_df) = NULL
   return(fisher_df)
