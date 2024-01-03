@@ -511,7 +511,8 @@ batch_testing = function(data_df,
         res_tbl,
         data.frame(
           facets = i_facet,
-          y_position = max(t_test_tbl[[test_var]], na.rm = T) * (1 + i_col * 0.1),
+          # y_position = max(t_test_tbl[[test_var]], na.rm = T) * (1 + i_col * 0.1),
+          y_position = max(c(x1,x2), na.rm = T) * (1 + i_col * 0.1),
           xmin = x_cat,
           xmax = y_cat,
           p.value = test_res$p.value, 
@@ -605,13 +606,26 @@ dirichletTest = function(count_df, predictor){
 #' Batch fisher test
 #' @param counts_bystatus A x B count matrix
 #' @param p.adjust.method P adjust method for `p.adjust`, default = 'BH'
+#' @param include_self Whether to include self counts. Default = TRUE 
 #' @param ... other arguments for `fisher.test`
 #' 
 #' @export
 #' @return a data.frame for p values and ORs from `fisher.test`
 #' 
-fisherTest = function(counts_bystatus, p.adjust.method = 'BH', ...){
+fisherTest = function(counts_bystatus, p.adjust.method = 'BH', include_self = TRUE,...){
   fisher_lst = list()
+  
+  if(length(setdiff(rownames(counts_bystatus), colnames(counts_bystatus))) == 0 & 
+     length(setdiff(colnames(counts_bystatus), rownames(counts_bystatus))) == 0){
+    if(!all(rownames(counts_bystatus) == colnames(counts_bystatus))){
+      common_names = rownames(counts_bystatus)
+      counts_bystatus = counts_bystatus[common_names, common_names]
+    }
+    if(!include_self){
+      diag(counts_bystatus) = 0
+    }
+  }
+  
   for(i in 1:nrow(counts_bystatus)){
     tmp_lst = lapply(1:ncol(counts_bystatus), function(j){
       tmp_mt = matrix(c(counts_bystatus[i, j], sum(counts_bystatus[-i, j]), 
