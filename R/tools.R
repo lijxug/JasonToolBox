@@ -657,3 +657,14 @@ fisherTest = function(counts_bystatus, p.adjust.method = 'BH', include_self = TR
   rownames(fisher_df) = NULL
   return(fisher_df)
 }
+
+#' Annotate gene using protein atlas
+#' @param genes A vector of genes
+#' @param ... other arguments 
+#' 
+#' @export
+#' @return A vector of annotated
+#' 
+annotateGenes = function(genes, ...){
+  
+}
