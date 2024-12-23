@@ -13,6 +13,7 @@ batch_testing(
   method = "permutation",
   pairby = NULL,
   p_cutoff = 0.1,
+  falltoperm = F,
   ...
 )
 }

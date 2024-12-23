@@ -4,12 +4,14 @@
 \alias{fisherTest}
 \title{Batch fisher test}
 \usage{
-fisherTest(counts_bystatus, p.adjust.method = "BH", ...)
+fisherTest(counts_bystatus, p.adjust.method = "BH", include_self = TRUE, ...)
 }
 \arguments{
 \item{counts_bystatus}{A x B count matrix}
 
 \item{p.adjust.method}{P adjust method for `p.adjust`, default = 'BH'}
+
+\item{include_self}{Whether to include self counts. Default = TRUE}
 
 \item{...}{other arguments for `fisher.test`}
 }

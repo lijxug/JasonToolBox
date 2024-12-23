@@ -663,10 +663,15 @@ fisherTest = function(counts_bystatus, p.adjust.method = 'BH', include_self = TR
   return(fisher_df)
 }
 
+#' Expand matrix
+#' @param x_mt a matrix
+#' @param col_names target colnames
+#' @param row_names target rownames
+#'
+#' @export
+#' @return a expanded matrix
+#'
 expand.mt = function(x_mt, col_names = NULL, row_names = NULL, fill = 0){
-  #' @param x_mt
-  #' @param col_names
-  #' @param row_names
 
   stopifnot(is.matrix(x_mt))
   if(!is.null(col_names)){
@@ -685,9 +690,12 @@ expand.mt = function(x_mt, col_names = NULL, row_names = NULL, fill = 0){
   return(x_mt)
 }
 
+#' Expand vector
+#' @param x_vec original vector
+#' @param vec_names target vector names
+#' @export
+#' @return a expanded vector
 expand.vec = function(x_vec, vec_names = NULL, fill = 0){
-  #' @param x_vec
-  #' @param vec_names
 
   stopifnot(is.vector(x_vec))
   if(!is.null(vec_names)){
@@ -704,8 +712,16 @@ expand.vec = function(x_vec, vec_names = NULL, fill = 0){
 #' @param ... other arguments
 #'
 #' @export
-#' @return A vector of annotated
+#' @return A vector of annotated categories
 #'
 annotateGenes = function(genes, ...){
-
+  data("proteinatlas")
+  gene_anno_vec = unlist(lapply(
+    genes,
+    FUN = function(i_gene) {
+      lgl_vec = unlist(lapply(proteinatlas, function(x){i_gene %in% x}))
+      return(paste0(names(lgl_vec)[lgl_vec], collapse = ','))
+    }
+  ))
+  return(gene_anno_vec)
 }
