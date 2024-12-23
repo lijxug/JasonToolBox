@@ -385,6 +385,7 @@ batch_testing = function(data_df,
                          method = 'permutation',
                          pairby = NULL,
                          p_cutoff = 0.1,
+                         falltoperm = F,
                          ...) {
   
   
@@ -445,8 +446,12 @@ batch_testing = function(data_df,
         next
       }
       if (length(x1) == 2 || length(x2) ==2){
-        warning('Values too few, using permutation test.\n')
-        test_res = permu.test(x1, x2, ...)
+        if(falltoperm){
+          warning('Values too few, using permutation test.\n')
+          test_res = permu.test(x1, x2, ...)
+        } else {
+          test_res = list(p.value = NA)
+        }
       } else {
         # Test
         if (method == 'permutation') {
@@ -656,4 +661,40 @@ fisherTest = function(counts_bystatus, p.adjust.method = 'BH', include_self = TR
   fisher_df$fisher.p.adj = p.adjust(fisher_df$fisher.p.val, method = p.adjust.method)
   rownames(fisher_df) = NULL
   return(fisher_df)
+}
+
+expand.mt = function(x_mt, col_names = NULL, row_names = NULL, fill = 0){
+  #' @param x_mt 
+  #' @param col_names 
+  #' @param row_names 
+  
+  stopifnot(is.matrix(x_mt))
+  if(!is.null(col_names)){
+    x_mt = cbind(x_mt, matrix(fill, nrow = nrow(x_mt), ncol = length(setdiff(col_names, colnames(x_mt)))))
+    colnames(x_mt)[colnames(x_mt) == ""] = setdiff(col_names, colnames(x_mt))
+    x_mt = x_mt[, col_names]
+  }
+  
+  if (!is.null(row_names)) {
+    x_mt = rbind(x_mt, matrix(0, ncol = ncol(x_mt), nrow = length(setdiff(
+      row_names, rownames(x_mt)
+    ))))
+    rownames(x_mt)[rownames(x_mt) == ""] = setdiff(row_names, rownames(x_mt))
+    x_mt = x_mt[row_names, ]
+  }
+  return(x_mt)
+}
+
+expand.vec = function(x_vec, vec_names = NULL, fill = 0){
+  #' @param x_vec 
+  #' @param vec_names 
+  
+  stopifnot(is.vector(x_vec))
+  if(!is.null(vec_names)){
+    out_names = setdiff(vec_names, names(x_vec))
+    x_vec = c(x_vec, rep(fill, length(out_names)))
+    names(x_vec)[names(x_vec) == ""] = out_names
+    x_vec = x_vec[vec_names] # sort
+  }
+  return(x_vec)
 }
