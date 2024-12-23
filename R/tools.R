@@ -663,6 +663,7 @@ fisherTest = function(counts_bystatus, p.adjust.method = 'BH', include_self = TR
   return(fisher_df)
 }
 
+<<<<<<< HEAD
 expand.mt = function(x_mt, col_names = NULL, row_names = NULL, fill = 0){
   #' @param x_mt 
   #' @param col_names 
@@ -698,3 +699,15 @@ expand.vec = function(x_vec, vec_names = NULL, fill = 0){
   }
   return(x_vec)
 }
+=======
+#' Annotate gene using protein atlas
+#' @param genes A vector of genes
+#' @param ... other arguments 
+#' 
+#' @export
+#' @return A vector of annotated
+#' 
+annotateGenes = function(genes, ...){
+  
+}
+>>>>>>> 2d45000d82a3dc14366422fa0d5f8534d1dac3f3
