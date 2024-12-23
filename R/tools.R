@@ -1,6 +1,6 @@
 #' @import methods
 #' @import stats
-#' @import utils 
+#' @import utils
 NULL
 
 #' Get the lower triangle of a symmetric matrix
@@ -15,7 +15,7 @@ getLowerTri2df = function(x_mt, keep_diag = T){
   row_tags = clusters[row(x_mt)]
   col_tags = clusters[col(x_mt)]
   low_idx = lower.tri(x_mt, diag = keep_diag)
-  out_df = data.frame(row_tag = row_tags[low_idx], col_tag = col_tags[low_idx], 
+  out_df = data.frame(row_tag = row_tags[low_idx], col_tag = col_tags[low_idx],
                       value = x_mt[low_idx])
   return(out_df)
 }
@@ -243,7 +243,7 @@ gg_color_hue <- function(n) {
 #'
 #' @param x A list with two named expression matrixces of n genes * m cells.
 #' @param ... Other options. Placeholder, not used yet.
-#' 
+#'
 #' @return a data.frame
 #' @export
 dea.wilcox = function(x, ...) {
@@ -318,13 +318,13 @@ apply_MM <- function(X, MARGIN = 1, FUN) {
 }
 
 #' Function for permutation test
-#' 
+#'
 #' @param x,y numeric vector of data values. Non-finite values will be ommitted
 #' @param n_perm permutation times
 #' @param alternative a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.
 #' @param seed Set permutation seed. Default = 1
 #' @param verbose logical value specify whether to print logs. Default = TRUE
-#' 
+#'
 #' @return A named list
 #' @export
 permu.test = function(x, y, n_perm = 2000, alternative = 'two.sided', seed = 1, verbose = T){
@@ -343,7 +343,7 @@ permu.test = function(x, y, n_perm = 2000, alternative = 'two.sided', seed = 1, 
     perm_y = sample(all_values, size = length(y))
     return(median(perm_x) - median(perm_y))
   }))
-  
+
   emp_p_g = (sum(perm_dist >= observed)+1)/(n_perm + 1)
   emp_p_l = (sum(perm_dist <= observed)+1)/(n_perm + 1)
   emp_p_both = (sum(abs(perm_dist) <= abs(observed))+1)/(n_perm + 1)
@@ -362,18 +362,18 @@ permu.test = function(x, y, n_perm = 2000, alternative = 'two.sided', seed = 1, 
 
 
 #' Wrapper for batch testing
-#' 
+#'
 #' @param data_df The data frame to test
 #' @param group_var The variable name for testing groups
-#' @param test_var The variable name for testing values 
+#' @param test_var The variable name for testing values
 #' @param test_set A 2 x n combn matrix for pairs of condition to test
 #' @param by_facet A string for the facet
 #' @param method One of the c('permutation', <to be added>)
 #' @param pairby The variable name for pairing, default NULL
 #' @param p_cutoff Specify the cutoff for significant p values
 #' @param ... Other parameters for test functions
-#' 
-#' 
+#'
+#'
 #' @importFrom magrittr `%>%`
 #' @return A data.frame
 #' @export
@@ -387,15 +387,15 @@ batch_testing = function(data_df,
                          p_cutoff = 0.1,
                          falltoperm = F,
                          ...) {
-  
-  
+
+
   res_tbl = dplyr::tibble()
   args = list(...)
   args$alternative = ifelse(is.null(args$alternative), 'two.sided', args$alternative)
   args$verbose = ifelse(is.null(args$verbose), T, args$verbose)
   args$n_perm = ifelse(is.null(args$n_perm), 2000, args$n_perm)
   args$paired = ifelse(is.null(pairby), F, T)
-  
+
   if (!is.null(by_facet)) {
     facets2test = unique(data_df[[by_facet]])
     facets2test = facets2test[!is.na(facets2test)]
@@ -408,12 +408,12 @@ batch_testing = function(data_df,
     } else {
       t_test_tbl = data_df[data_df[[by_facet]] == i_facet, ]
     }
-    
+
     for (i_col in 1:ncol(test_set)) {
       # Prepare data
       x_cat = test_set[1, i_col]
       y_cat = test_set[2, i_col]
-      
+
       if (args$paired) {
         if (any(!c(x_cat, y_cat) %in% t_test_tbl[[group_var]])) {
           x1 = NULL
@@ -438,10 +438,10 @@ batch_testing = function(data_df,
           x2 = t_test_tbl[t_test_tbl[[group_var]] == y_cat, test_var, drop = T]
         }
       }
-      
+
       x1 = x1[is.finite(x1)]
       x2 = x2[is.finite(x2)]
-      
+
       if (length(x1) <2 || length(x2) < 2) {
         next
       }
@@ -476,7 +476,7 @@ batch_testing = function(data_df,
                                   mean = mean(x2 - x1),
                                   sd = sd(x2 - x1))
             }
-            
+
           } else {
             if (length(x1) < 3) {
               shape_res1 = list(p.value = 0)
@@ -485,7 +485,7 @@ batch_testing = function(data_df,
             } else {
               shape_res1 = ks.test(x1, pnorm, mean = mean(x1), sd = sd(x1))
             }
-            
+
             if (length(x2) < 3) {
               shape_res2 = list(p.value = 0)
             } else if (length(x2) < 50) {
@@ -495,7 +495,7 @@ batch_testing = function(data_df,
             }
             shape_res = list(p.value = min(shape_res1$p.value, shape_res2$p.value))
           }
-          
+
           if (shape_res$p.value > p_cutoff) {
             test_res = t.test(x1, x2, paired = args$paired, ...)
           } else {
@@ -510,7 +510,7 @@ batch_testing = function(data_df,
                                 alternative = args$alternative)
         }
       }
-      
+
       # Arrange position
       res_tbl = dplyr::bind_rows(
         res_tbl,
@@ -520,7 +520,7 @@ batch_testing = function(data_df,
           y_position = max(c(x1,x2), na.rm = T) * (1 + i_col * 0.1),
           xmin = x_cat,
           xmax = y_cat,
-          p.value = test_res$p.value, 
+          p.value = test_res$p.value,
           grp1_mean = mean(x1, na.rm = T),
           grp2_mean = mean(x2, na.rm = T),
           grp1_zscore = mean((x1-mean(c(x1,x2)))/sd(c(x1,x2))),
@@ -529,17 +529,17 @@ batch_testing = function(data_df,
       )
     }
   }
-  
+
   return(res_tbl)
 }
 
 
 # #' Dirichlet-multinomial regression test
-# #' this function is adapted from https://github.com/cssmillie/ulcerative_colitis:analysis.r  
+# #' this function is adapted from https://github.com/cssmillie/ulcerative_colitis:analysis.r
 # #'
 # #' @export
 # #'
-# dirichlet_regression = function(counts, covariates, formula){  
+# dirichlet_regression = function(counts, covariates, formula){
 #   # Dirichlet multinomial regression to detect changes in cell frequencies
 #   # formula is not quoted, example: counts ~ condition
 #   # counts is a [samples x cell types] matrix
@@ -549,35 +549,35 @@ batch_testing = function(data_df,
 #   # counts = do.call(cbind, tapply(seur@data.info$orig.ident, seur@ident, table))
 #   # covariates = data.frame(condition=gsub('[12].*', '', rownames(counts)))
 #   # res = dirichlet_regression(counts, covariates, counts ~ condition)
-#   
+#
 #   #ep.pvals = dirichlet_regression(counts=ep.freq, covariates=ep.cov, formula=counts ~ condition)$pvals
-#   
+#
 #   # Calculate regression
 #   counts = as.data.frame(counts)
 #   counts$counts = DR_data(counts)
 #   data = cbind(counts, covariates)
 #   fit = DirichReg(counts ~ condition, data)
-#   
+#
 #   # Get p-values
 #   u = summary(fit)
 #   #compared with healthy condition, 15 vars. noninflame and inflame, 30pvalues
-#   pvals = u$coef.mat[grep('Intercept', rownames(u$coef.mat), invert=T), 4] 
+#   pvals = u$coef.mat[grep('Intercept', rownames(u$coef.mat), invert=T), 4]
 #   v = names(pvals)
 #   pvals = matrix(pvals, ncol=length(u$varnames))
 #   rownames(pvals) = gsub('condition', '', v[1:nrow(pvals)])
 #   colnames(pvals) = u$varnames
 #   fit$pvals = pvals
-#   
+#
 #   fit
 # }
 #' Dirichlet-multinomial regression test
 #' @param count_df sample x cell_fraction data.frame
 #' @param predictor A named vector
-#' 
+#'
 #' @import DirichletReg reshape2 dplyr
 #'
 #' @export
-#' 
+#'
 dirichletTest = function(count_df, predictor){
   # require(DirichletReg)
   count_df$Y = DirichletReg::DR_data(count_df)
@@ -597,30 +597,30 @@ dirichletTest = function(count_df, predictor){
   colnames(estimates) = u$varnames
   fit$pvals = pvals
   fit$estimates = estimates
-  
+
   pvals_df = reshape2::melt(pvals, varnames = c('status', 'celltypes'), value.name = 'p.value')
   estimates_df = reshape2::melt(estimates, varnames = c('status', 'celltypes'), value.name = 'estimates')
-  
+
   res_df = left_join(pvals_df, estimates_df, by = c('status', 'celltypes'))
   res_df$isInterval = res_df$status == levels(predictor)[1]
   fit$res_df = res_df
-  
+
   return(fit)
 }
 
 #' Batch fisher test
 #' @param counts_bystatus A x B count matrix
 #' @param p.adjust.method P adjust method for `p.adjust`, default = 'BH'
-#' @param include_self Whether to include self counts. Default = TRUE 
+#' @param include_self Whether to include self counts. Default = TRUE
 #' @param ... other arguments for `fisher.test`
-#' 
+#'
 #' @export
 #' @return a data.frame for p values and ORs from `fisher.test`
-#' 
+#'
 fisherTest = function(counts_bystatus, p.adjust.method = 'BH', include_self = TRUE,...){
   fisher_lst = list()
-  
-  if(length(setdiff(rownames(counts_bystatus), colnames(counts_bystatus))) == 0 & 
+
+  if(length(setdiff(rownames(counts_bystatus), colnames(counts_bystatus))) == 0 &
      length(setdiff(colnames(counts_bystatus), rownames(counts_bystatus))) == 0){
     if(!all(rownames(counts_bystatus) == colnames(counts_bystatus))){
       common_names = rownames(counts_bystatus)
@@ -630,16 +630,16 @@ fisherTest = function(counts_bystatus, p.adjust.method = 'BH', include_self = TR
       diag(counts_bystatus) = 0
     }
   }
-  
+
   for(i in 1:nrow(counts_bystatus)){
     tmp_lst = lapply(1:ncol(counts_bystatus), function(j){
-      tmp_mt = matrix(c(counts_bystatus[i, j], sum(counts_bystatus[-i, j]), 
+      tmp_mt = matrix(c(counts_bystatus[i, j], sum(counts_bystatus[-i, j]),
         sum(counts_bystatus[i, -j]), sum(counts_bystatus[-i, -j])), nrow = 2
       )
       rownames(tmp_mt) = c(rownames(counts_bystatus)[i], 'others')
       colnames(tmp_mt) = c(colnames(counts_bystatus)[j], 'others')
       fish_obj = fisher.test(tmp_mt, ...)
-      return(data.frame(i = rownames(counts_bystatus)[i], j = colnames(counts_bystatus)[j], 
+      return(data.frame(i = rownames(counts_bystatus)[i], j = colnames(counts_bystatus)[j],
                         fisher.p.val = fish_obj$p.value, fisher.OR = fish_obj$estimate))
     })
     fisher_lst[[i]] = do.call(rbind, tmp_lst)
@@ -649,33 +649,32 @@ fisherTest = function(counts_bystatus, p.adjust.method = 'BH', include_self = TR
   fisher_df$fisher.OR[fisher_df$i == fisher_df$j] = NA
   pval_mt = reshape2::acast(data = fisher_df, i~j, value.var = 'fisher.p.val')
   padj_mt = pval_mt
-    
+
   padj_mt[upper.tri(padj_mt)] = p.adjust(pval_mt[upper.tri(pval_mt)])
   padj_mt[lower.tri(padj_mt)] = t(padj_mt)[lower.tri(padj_mt)]
-  
+
   fisher_df = dplyr::left_join(
-    fisher_df,  
-    reshape2::melt(padj_mt, varnames = c('i','j'), value.name = 'fisher.p.adj'), 
+    fisher_df,
+    reshape2::melt(padj_mt, varnames = c('i','j'), value.name = 'fisher.p.adj'),
     by = c('i', 'j'))
-    
+
   fisher_df$fisher.p.adj = p.adjust(fisher_df$fisher.p.val, method = p.adjust.method)
   rownames(fisher_df) = NULL
   return(fisher_df)
 }
 
-<<<<<<< HEAD
 expand.mt = function(x_mt, col_names = NULL, row_names = NULL, fill = 0){
-  #' @param x_mt 
-  #' @param col_names 
-  #' @param row_names 
-  
+  #' @param x_mt
+  #' @param col_names
+  #' @param row_names
+
   stopifnot(is.matrix(x_mt))
   if(!is.null(col_names)){
     x_mt = cbind(x_mt, matrix(fill, nrow = nrow(x_mt), ncol = length(setdiff(col_names, colnames(x_mt)))))
     colnames(x_mt)[colnames(x_mt) == ""] = setdiff(col_names, colnames(x_mt))
     x_mt = x_mt[, col_names]
   }
-  
+
   if (!is.null(row_names)) {
     x_mt = rbind(x_mt, matrix(0, ncol = ncol(x_mt), nrow = length(setdiff(
       row_names, rownames(x_mt)
@@ -687,9 +686,9 @@ expand.mt = function(x_mt, col_names = NULL, row_names = NULL, fill = 0){
 }
 
 expand.vec = function(x_vec, vec_names = NULL, fill = 0){
-  #' @param x_vec 
-  #' @param vec_names 
-  
+  #' @param x_vec
+  #' @param vec_names
+
   stopifnot(is.vector(x_vec))
   if(!is.null(vec_names)){
     out_names = setdiff(vec_names, names(x_vec))
@@ -699,15 +698,14 @@ expand.vec = function(x_vec, vec_names = NULL, fill = 0){
   }
   return(x_vec)
 }
-=======
+
 #' Annotate gene using protein atlas
 #' @param genes A vector of genes
-#' @param ... other arguments 
-#' 
+#' @param ... other arguments
+#'
 #' @export
 #' @return A vector of annotated
-#' 
+#'
 annotateGenes = function(genes, ...){
-  
+
 }
->>>>>>> 2d45000d82a3dc14366422fa0d5f8534d1dac3f3
